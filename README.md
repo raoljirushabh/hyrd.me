@@ -1,6 +1,6 @@
 # Hyrd.me
 
-Tailor your resume, cover letter & application — naturally, strategically, undetectably.
+Tailor your resume, cover letter & application - naturally, strategically, undetectably.
 
 **Hyrd** is an AI-powered tool that helps job seekers optimize their application materials for maximum ATS (Applicant Tracking System) compatibility while maintaining authenticity and human-like writing quality.
 
