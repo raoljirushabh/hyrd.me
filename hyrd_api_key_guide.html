@@ -29,10 +29,10 @@
   .cost-num { font-size: 16px; font-weight: 500; color: var(--text-primary); }
   .cost-desc { font-size: 11px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
   .divider { border: none; border-top: 0.5px solid var(--border); margin: 2rem 0; }
-  .hyrd-header { background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
-  .hyrd-logo { display: flex; align-items: center; gap: 10px; }
-  .hyrd-mark { width: 28px; height: 28px; background: linear-gradient(135deg,#6c63ff,#a855f7); border-radius: 7px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; flex-shrink: 0; }
-  .hyrd-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .hyr.me-header { background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+  .hyr.me-logo { display: flex; align-items: center; gap: 10px; }
+  .hyr.me-mark { width: 28px; height: 28px; background: linear-gradient(135deg,#6c63ff,#a855f7); border-radius: 7px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; flex-shrink: 0; }
+  .hyr.me-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
   .key-btn { font-size: 11px; padding: 5px 12px; background: transparent; border: 0.5px solid var(--border-success); border-radius: 6px; color: var(--text-success); cursor: default; display: flex; align-items: center; gap: 5px; }
   .key-panel { background: var(--surface-0); border: 0.5px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-top: 8px; }
   .key-input-row { display: flex; gap: 8px; margin-top: 6px; }
@@ -45,7 +45,7 @@
 <div class="wrap">
 
   <h2 class="page-title">How to get your Anthropic API key</h2>
-  <p class="page-sub">Hyrd uses the Anthropic API to generate your resume and cover letter. You need your own key to run it. This takes about two minutes and costs nothing to set up.</p>
+  <p class="page-sub">hyr.me uses the Anthropic API to generate your resume and cover letter. You need your own key to run it. This takes about two minutes and costs nothing to set up.</p>
 
   <div class="step">
     <div class="step-num">1</div>
@@ -68,7 +68,7 @@
     <div class="step-num">2</div>
     <div class="step-body">
       <div class="step-title">Add billing information</div>
-      <div class="step-desc">Go to Settings, then Billing, and add a credit or debit card. Anthropic charges per API call, not a monthly subscription. For personal use with Hyrd, you will spend well under a dollar for dozens of runs. Set a monthly spend limit if you want a hard ceiling.</div>
+      <div class="step-desc">Go to Settings, then Billing, and add a credit or debit card. Anthropic charges per API call, not a monthly subscription. For personal use with hyr.me, you will spend well under a dollar for dozens of runs. Set a monthly spend limit if you want a hard ceiling.</div>
       <div class="step-visual">
         <div style="display:flex;gap:12px">
           <div style="width:110px;flex-shrink:0">
@@ -95,12 +95,12 @@
     <div class="step-num">3</div>
     <div class="step-body">
       <div class="step-title">Generate your API key</div>
-      <div class="step-desc">Click API Keys in the left sidebar, then Create Key. Give it a recognisable name like "hyrd" so you know what it is later. Copy the key the moment it appears. Anthropic only shows it once.</div>
+      <div class="step-desc">Click API Keys in the left sidebar, then Create Key. Give it a recognisable name like "hyr.me" so you know what it is later. Copy the key the moment it appears. Anthropic only shows it once.</div>
       <div class="step-visual">
         <div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:10px">API Keys</div>
         <div class="field-row" style="margin-bottom:12px">
           <div class="field-label" style="width:60px">Name</div>
-          <div class="field-val">hyrd</div>
+          <div class="field-val">hyr.me</div>
           <button class="mock-btn-primary" style="flex-shrink:0">Create Key</button>
         </div>
         <div class="key-display">
@@ -118,13 +118,13 @@
   <div class="step">
     <div class="step-num">4</div>
     <div class="step-body">
-      <div class="step-title">Paste it into Hyrd</div>
-      <div class="step-desc">Click the API Key button in the top right corner of Hyrd, paste your key into the field, and hit Save. Your key stays in the browser for that session only. When you close the tab, it is gone. You will need to paste it again next time you open the app.</div>
+      <div class="step-title">Paste it into hyr.me</div>
+      <div class="step-desc">Click the API Key button in the top right corner of hyr.me, paste your key into the field, and hit Save. Your key stays in the browser for that session only. When you close the tab, it is gone. You will need to paste it again next time you open the app.</div>
       <div class="step-visual">
-        <div class="hyrd-header">
-          <div class="hyrd-logo">
-            <div class="hyrd-mark">✦</div>
-            <div class="hyrd-name">Hyrd</div>
+        <div class="hyr.me-header">
+          <div class="hyr.me-logo">
+            <div class="hyr.me-mark">✦</div>
+            <div class="hyr.me-name">hyr.me</div>
           </div>
           <div class="key-btn"><i class="ti ti-check" style="font-size:13px" aria-hidden="true"></i> API Key set</div>
         </div>
@@ -143,7 +143,7 @@
   <div class="divider"></div>
 
   <div style="font-size:14px;font-weight:500;color:var(--text-primary);margin-bottom:12px">What it will cost you</div>
-  <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:12px">Each time you generate a resume and cover letter, Hyrd sends your job description and resume to the Anthropic API and gets back the tailored content. You are billed for the text processed, not per session.</p>
+  <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:12px">Each time you generate a resume and cover letter, hyr.me sends your job description and resume to the Anthropic API and gets back the tailored content. You are billed for the text processed, not per session.</p>
 
   <div class="cost-grid">
     <div class="cost-card">
@@ -163,6 +163,6 @@
   <div class="divider"></div>
 
   <div style="font-size:14px;font-weight:500;color:var(--text-primary);margin-bottom:8px">Keeping your key safe</div>
-  <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin:0">Treat your API key like a password. Do not paste it into websites you do not control, do not share it in messages or screenshots, and do not commit it to a public GitHub repository. In Hyrd it travels only from your browser directly to Anthropic. No other server sees it.</p>
+  <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin:0">Treat your API key like a password. Do not paste it into websites you do not control, do not share it in messages or screenshots, and do not commit it to a public GitHub repository. In hyr.me it travels only from your browser directly to Anthropic. No other server sees it.</p>
 
 </div>
