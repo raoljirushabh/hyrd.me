@@ -1,16 +1,544 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0d1117" />
-    <meta name="description" content="Tailor your resume, cover letter & application — naturally, strategically, undetectably." />
-    <title>Hyrd.me - Resume Tailoring & ATS Optimization</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <script type="module" src="/src/index.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hyrd — AI Resume Tailor</title>
+  <meta name="description" content="Tailor your resume, cover letter and job application with AI — naturally, strategically, undetectably.">
+  <meta property="og:title" content="Hyrd — AI Resume Tailor">
+  <meta property="og:description" content="Tailor your resume and cover letter with AI. Sounds human. Scores high on ATS.">
+  <style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #080b11; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #e6edf3; }
+    textarea:focus, input:focus { outline: none !important; border-color: #6c63ff !important; box-shadow: 0 0 0 3px rgba(108,99,255,.1) !important; }
+    textarea, input { transition: border-color .2s, box-shadow .2s; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #080b11; }
+    ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+    .fade-in { animation: fadeIn .4s ease both; }
+    @media (max-width: 768px) {
+      .input-grid { grid-template-columns: 1fr !important; }
+      .ats-wrap { flex-direction: column !important; align-items: center !important; }
+      .page-pad { padding: 16px !important; }
+      .header-pad { padding: 14px 16px !important; }
+      .bar-lbl { width: 90px !important; }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.umd.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useRef, useEffect, useCallback } = React;
+
+const C = {
+  bg: '#080b11', card: '#0d1117', border: '#21262d',
+  muted: '#6e7681', accent: '#6c63ff', text: '#e6edf3',
+  green: '#3fb950', yellow: '#d29922', red: '#f85149'
+};
+
+if (window.pdfjsLib) {
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+const sanitize = txt => {
+  if (!txt) return txt;
+  return txt
+    .replace(/\s*—\s*/g, ', ')
+    .replace(/\s*--\s*/g, ', ')
+    .replace(/;\s*([a-zA-Z])/g, (_, c) => '. ' + c.toUpperCase())
+    .replace(/([a-z]{3,}[^:\n]{2,})\s*:\s*([a-zA-Z])/g, (m, b, a) => b + '. ' + a.toUpperCase())
+    .replace(/\bI've\b/g, 'I have').replace(/\bI'd\b/g, 'I would')
+    .replace(/\bI'm\b/g, 'I am').replace(/\bI'll\b/g, 'I will')
+    .replace(/\bdon't\b/gi, 'do not').replace(/\bcan't\b/gi, 'cannot')
+    .replace(/\bwon't\b/gi, 'will not').replace(/\bdidn't\b/gi, 'did not')
+    .replace(/\bdoesn't\b/gi, 'does not').replace(/\bwouldn't\b/gi, 'would not')
+    .replace(/\bcouldn't\b/gi, 'could not').replace(/\bshouldn't\b/gi, 'should not')
+    .replace(/\bwasn't\b/gi, 'was not').replace(/\bweren't\b/gi, 'were not')
+    .replace(/\bhasn't\b/gi, 'has not').replace(/\bhaven't\b/gi, 'have not')
+    .replace(/\bhadn't\b/gi, 'had not').replace(/\bisn't\b/gi, 'is not')
+    .replace(/\baren't\b/gi, 'are not').replace(/\bit's\b/gi, 'it is')
+    .replace(/\bthat's\b/gi, 'that is').replace(/\bthere's\b/gi, 'there is')
+    .replace(/\bwhat's\b/gi, 'what is').replace(/\bwho's\b/gi, 'who is')
+    .replace(/\bhe's\b/gi, 'he is').replace(/\bshe's\b/gi, 'she is')
+    .replace(/\bthey're\b/gi, 'they are').replace(/\bwe're\b/gi, 'we are')
+    .replace(/\byou're\b/gi, 'you are').replace(/\bthey've\b/gi, 'they have')
+    .replace(/\bwe've\b/gi, 'we have').replace(/\byou've\b/gi, 'you have')
+    .replace(/\bhe'd\b/gi, 'he would').replace(/\bshe'd\b/gi, 'she would')
+    .replace(/\bthey'd\b/gi, 'they would').replace(/\bwe'd\b/gi, 'we would')
+    .replace(/\byou'd\b/gi, 'you would').replace(/\bhe'll\b/gi, 'he will')
+    .replace(/\bshe'll\b/gi, 'she will').replace(/\bthey'll\b/gi, 'they will')
+    .replace(/\bwe'll\b/gi, 'we will').replace(/\byou'll\b/gi, 'you will')
+    .replace(/\blet's\b/gi, 'let us');
+};
+
+function App() {
+  const [apiKey, setApiKey]     = useState('');
+  const [showKey, setShowKey]   = useState(false);
+  const [mode, setMode]         = useState('paste');
+  const [jd, setJd]             = useState('');
+  const [resText, setResText]   = useState('');
+  const [fileTxt, setFileTxt]   = useState('');
+  const [fileName, setFileName] = useState('');
+  const [questions, setQuestions] = useState(['']);
+  const [loading, setLoading]   = useState(false);
+  const [loadMsg, setLoadMsg]   = useState('');
+  const [result, setResult]     = useState(null);
+  const [tab, setTab]           = useState('r');
+  const [error, setError]       = useState('');
+  const [copied, setCopied]     = useState({ r: false, c: false, q: false });
+  const [atsAnim, setAtsAnim]   = useState(false);
+  const [drag, setDrag]         = useState(false);
+  const ticker = useRef(null);
+
+  useEffect(() => {
+    if (result) setTimeout(() => setAtsAnim(true), 120);
+    else setAtsAnim(false);
+  }, [result]);
+
+  const MSGS = [
+    'Analyzing job description...',
+    'Extracting key requirements...',
+    'Tailoring your resume...',
+    'Weaving in the right keywords...',
+    'Crafting your cover letter...',
+    'Answering application questions...',
+    'Calculating ATS score...'
+  ];
+
+  const handleFile = async file => {
+    if (!file) return;
+    setFileName(file.name); setFileTxt('');
+    const ab = await file.arrayBuffer();
+    try {
+      if (file.name.toLowerCase().endsWith('.docx')) {
+        const r = await window.mammoth.extractRawText({ arrayBuffer: ab });
+        setFileTxt(r.value);
+      } else {
+        const pdf = await window.pdfjsLib.getDocument({ data: ab }).promise;
+        let t = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const pg = await pdf.getPage(i);
+          const ct = await pg.getTextContent();
+          t += ct.items.map(x => x.str).join(' ') + '\n';
+        }
+        setFileTxt(t);
+      }
+    } catch { setError('Could not parse file. Please try pasting the text instead.'); }
+  };
+
+  const addQ    = () => setQuestions(q => [...q, '']);
+  const removeQ = i => setQuestions(q => q.filter((_, j) => j !== i));
+  const updateQ = (i, v) => setQuestions(q => q.map((x, j) => j === i ? v : x));
+  const activeQs = questions.filter(q => q.trim());
+
+  const generate = async () => {
+    setError('');
+    if (!apiKey.trim()) { setError('Please enter your Anthropic API key first.'); setShowKey(true); return; }
+    const resume = mode === 'paste' ? resText.trim() : fileTxt.trim();
+    if (!jd.trim()) { setError('Please paste a job description.'); return; }
+    if (!resume) { setError('Please provide your resume.'); return; }
+
+    setLoading(true); setResult(null);
+    let i = 0; setLoadMsg(MSGS[0]);
+    ticker.current = setInterval(() => { i = (i + 1) % MSGS.length; setLoadMsg(MSGS[i]); }, 2200);
+
+    const qSection = activeQs.length > 0
+      ? `\n\nAPPLICATION QUESTIONS TO ANSWER:\n${activeQs.map((q, i) => `${i + 1}. ${q}`).join('\n')}`
+      : '';
+
+    const prompt = `You are a world-class career strategist and ghostwriter who has spent 20 years helping senior professionals land roles at companies they genuinely want to work at. You combine deep knowledge of ATS systems, recruiter psychology, and industry-specific hiring norms. Every resume and cover letter you produce reads like it was written by a sharp, thoughtful human, never a tool.
+
+MISSION: Achieve the highest possible ATS match score, targeting 95 to 100 percent. Every section of the resume must be deliberately engineered to mirror the JD language, priorities, and structure while remaining truthful and natural.
+
+BANNED PUNCTUATION AND PATTERNS:
+No em dashes (—) or double hyphens (--). Restructure any sentence that needs one.
+No semicolons (;) in sentences. Break the thought into two sentences instead.
+No colons (:) mid-sentence to introduce lists or clauses. Write it out as a full sentence or split it.
+No contractions anywhere. Write "I have" not "I've", "I would" not "I'd", "it is" not "it's", "do not" not "don't", "cannot" not "can't", "will not" not "won't", "I am" not "I'm". Every word written out in full.
+
+BANNED VOCABULARY: Furthermore, Moreover, Additionally, In conclusion, To summarize, It is worth noting, Needless to say, With that said, Moving forward, Leverage, Synergy, Dynamic, Passionate, Results-driven, Detail-oriented, Robust, Comprehensive, Nuanced, Pivotal, Crucial, Seamlessly, Cutting-edge, Innovative, Holistic, Impactful, Transformative, Utilized, Facilitated, Spearheaded, Championed, Orchestrated, Proactively, Best-in-class, Landscape, Ecosystem, Journey, Tapestry, Realm, Delve, Thrilled to apply, Excited to, Passionate about
+
+HUMAN WRITING RULES:
+Vary sentence length throughout. Short punchy sentences mixed with longer ones that carry more context.
+No two bullets in the same role start with the same verb.
+No uniform bullet length or paragraph structure. Real people write with variation.
+Bullets should read like a person describing their best work to someone they respect.
+Cover letter opener must be sharp and specific, showing genuine understanding of the company or role.
+Cover letter close must be direct and confident, not "I look forward to hearing from you at your earliest convenience."
+Application question answers start with the answer itself, not a preamble. 2 to 4 sentences, confident and grounded.
+
+GRAMMAR AND CONSISTENCY:
+Fix all errors silently. Past tense for past roles, present for current.
+Standardize dates to "Mon YYYY to Mon YYYY" format. Write "Present" with a capital P for current roles.
+Bullet punctuation consistent throughout. Either all end with a period or none do.
+Capitalize technologies correctly: JavaScript, AWS, Python, TypeScript, React, etc.
+Remove redundancies: "in order to" becomes "to", "was responsible for" becomes the actual verb.
+Numbers: spell out one through nine in prose, numerals for 10 and above.
+
+ATS MAXIMUM COVERAGE:
+Summary section (4 to 5 lines): mirror the JD using the exact job title from the posting, top 4 to 5 required skills, and the candidate most relevant experience framed around the role core need.
+Skills section: list every hard skill, tool, technology, methodology, and domain keyword in the JD that the candidate can reasonably claim.
+Keyword audit: every JD keyword must appear somewhere. Acronyms get both forms at least once. High-frequency JD keywords appear in both the summary and at least one bullet. Mirror JD phrasing exactly where natural.
+Responsibility coverage: read the JD line by line. Every responsibility must be addressed by a bullet. For gaps, add a bullet grounded in what someone with the candidate title and seniority would plausibly do. 5 to 7 bullets for the most recent role, 4 to 5 for mid-history, 2 to 3 for older roles.
+
+STAR BULLET FORMAT (invisible structure):
+Situation or Task: 2 to 3 words of embedded context mid-sentence, never a separate clause.
+Action: the main verb phrase using the JD keyword naturally embedded.
+Result: concrete outcome, quantified if the resume provides any basis, otherwise scoped by team size or timeframe.
+The bullet reads as one fluid sentence or two short ones. Never three clauses joined by any punctuation.
+
+FINAL SELF-CHECK BEFORE OUTPUT:
+Scan every sentence and verify: zero em dashes, zero double hyphens, zero semicolons, zero mid-sentence colons, zero contractions, every bullet in the same role starts with a different verb, no two consecutive sentences follow identical structure. If any of the above are present, rewrite the offending sentence before returning.
+
+JOB DESCRIPTION:
+${jd}
+
+CANDIDATE RESUME:
+${resume}${qSection}
+
+Return ONLY this exact JSON structure with no text before or after it:
+{
+  "tailored_resume": "full rewritten resume as plain text",
+  "cover_letter": "full cover letter as plain text, 3 to 4 focused paragraphs",
+  "application_answers": ${activeQs.length > 0 ? `[${activeQs.map(q => `{"question":"${q.replace(/"/g,'\\"')}","answer":"..."}`).join(',')}]` : '[]'},
+  "ats_score": 95,
+  "ats_confidence": "Strong",
+  "ats_summary": "One precise sentence on match quality. If below 95, state exactly what is still missing.",
+  "ats_breakdown": {"Keyword Match": 95, "Skills Alignment": 93, "Experience Relevance": 90, "Formatting and Clarity": 96},
+  "keywords_added": ["up to 10 keywords naturally woven in from the JD"]
+}`;
+
+    try {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+          'x-api-key': apiKey.trim()
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 6000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error.message);
+      const raw = data.content[0].text.replace(/^```json\s*/, '').replace(/```\s*$/, '').trim();
+      const parsed = JSON.parse(raw);
+      setResult({
+        ...parsed,
+        tailored_resume: sanitize(parsed.tailored_resume),
+        cover_letter: sanitize(parsed.cover_letter),
+        application_answers: (parsed.application_answers || []).map(qa => ({ ...qa, answer: sanitize(qa.answer) }))
+      });
+      setTab('r');
+      setTimeout(() => document.getElementById('output-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    } catch (e) {
+      setError('Something went wrong: ' + e.message + '. Please try again.');
+    } finally {
+      clearInterval(ticker.current);
+      setLoading(false);
+    }
+  };
+
+  const getOutputText = t => {
+    if (t === 'r') return result.tailored_resume;
+    if (t === 'c') return result.cover_letter;
+    return (result.application_answers || []).map(a => `Q: ${a.question}\n\nA: ${a.answer}`).join('\n\n---\n\n');
+  };
+
+  const cp = async t => {
+    await navigator.clipboard.writeText(getOutputText(t)).catch(() => {});
+    setCopied(p => ({ ...p, [t]: true }));
+    setTimeout(() => setCopied(p => ({ ...p, [t]: false })), 2200);
+  };
+
+  const dlTxt = (t, name) => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([getOutputText(t)], { type: 'text/plain' }));
+    a.download = name; a.click();
+  };
+
+  const dlDocx = async (t, fname) => {
+    const txt = getOutputText(t);
+    const { Document, Packer, Paragraph, TextRun } = window.docx;
+    const lines = txt.split('\n');
+    const HEADERS = ['experience','education','skills','summary','objective','profile','certifications','awards','publications','projects','volunteer','languages','interests','references','achievements','accomplishments','work experience','professional experience','technical skills','core competencies','professional summary','career summary','key skills','additional information','employment history','qualifications'];
+    const norm = s => s.toLowerCase().replace(/[^a-z\s]/g,'').trim();
+    const isHead = line => {
+      const tr = line.trim();
+      if (!tr || tr.length > 72) return false;
+      const n = norm(tr);
+      if (HEADERS.some(h => n === h || n === h+'s' || n.startsWith(h+' '))) return true;
+      if (tr === tr.toUpperCase() && tr.length > 2 && /[A-Z]/.test(tr) && !/@|http|\d{3}/.test(tr)) return true;
+      return false;
+    };
+    const isContact = l => /[@|•·]|\d{3}[\s.\-]\d{3,4}|\blinkedin\b|\bgithub\b|\bwww\b|http/i.test(l);
+    const isBullet  = l => /^[\s]*[•\-\*◦▸►✓–]\s+\S/.test(l);
+    const isRole    = l => { const tr=l.trim(); return tr.length>0&&tr.length<90&&!tr.endsWith('.')&&(/\|\s/.test(tr)||(/\d{4}/.test(tr)&&tr.length<80&&!isBullet(tr))); };
+    const children = []; let nameOk = false, contactOk = false;
+    if (t === 'r') {
+      for (let i = 0; i < lines.length; i++) {
+        const tr = lines[i].trim();
+        if (!tr) { children.push(new Paragraph({ children:[new TextRun('')], spacing:{after:60} })); continue; }
+        if (!nameOk) { nameOk=true; children.push(new Paragraph({ children:[new TextRun({text:tr,bold:true,size:36,font:'Calibri',color:'111827'})], spacing:{after:80} })); continue; }
+        if (!contactOk) { if (isContact(tr)||i<=4) { if (isContact(tr)) { children.push(new Paragraph({ children:[new TextRun({text:tr,size:18,font:'Calibri',color:'4B5563'})], spacing:{after:40} })); continue; } } contactOk=true; }
+        contactOk=true;
+        if (isHead(tr)) { children.push(new Paragraph({ children:[new TextRun({text:tr.toUpperCase(),bold:true,size:22,font:'Calibri',color:'111827'})], spacing:{before:300,after:100}, border:{bottom:{color:'9CA3AF',size:6,space:4,style:'single'}} })); continue; }
+        if (isRole(tr)) {
+          const parts = tr.split(/\s*\|\s*/);
+          const runs = parts.flatMap((p,idx)=>[ new TextRun({text:p.trim(),bold:idx===0,italics:idx===parts.length-1&&/\d{4}|present/i.test(p),size:21,font:'Calibri',color:'111827'}), ...(idx<parts.length-1?[new TextRun({text:' · ',size:21,font:'Calibri',color:'9CA3AF'})]:[]) ]);
+          children.push(new Paragraph({ children:runs, spacing:{before:140,after:60} })); continue;
+        }
+        if (isBullet(tr)) { children.push(new Paragraph({ children:[new TextRun({text:tr.replace(/^[•\-\*◦▸►✓–]\s+/,''),size:20,font:'Calibri',color:'1F2937'})], bullet:{level:0}, spacing:{after:60} })); continue; }
+        children.push(new Paragraph({ children:[new TextRun({text:tr,size:20,font:'Calibri',color:'1F2937'})], spacing:{after:80} }));
+      }
+    } else {
+      let buf=[];
+      const flush=()=>{
+        if(!buf.length) return;
+        const ft=buf.join(' ');
+        const isSign=/^(sincerely|regards|best|warm regards|yours|thank you)[,.]?$/i.test(ft.trim());
+        const isQ=ft.startsWith('Q:');
+        children.push(new Paragraph({ children:[new TextRun({text:ft,size:22,font:'Calibri',color:'1F2937',bold:isSign||isQ})], spacing:{after:isSign?320:180} }));
+        buf=[];
+      };
+      for (const line of lines) { const tr=line.trim(); if(!tr){flush();continue;} buf.push(tr); }
+      flush();
+    }
+    const doc = new Document({ styles:{default:{document:{run:{font:'Calibri',size:20,color:'1F2937'}}}}, sections:[{properties:{page:{margin:{top:1080,bottom:1080,left:1080,right:1080}}},children}] });
+    const blob = await Packer.toBlob(doc);
+    const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname+'.docx'; a.click();
+  };
+
+  const score = result?.ats_score || 0;
+  const scoreColor = score>=80 ? C.green : score>=60 ? C.yellow : C.red;
+  const dashOffset = atsAnim ? 251.3-(score/100)*251.3 : 251.3;
+  const hasQAs = result?.application_answers?.length > 0;
+  const tabs = [['r','📄 Resume'],['c','✉️ Cover Letter'],...(hasQAs?[['q','❓ Application Q&A']]:[])] ;
+
+  const S = {
+    togBtn: active => ({ flex:1, padding:'6px', border:'none', borderRadius:5, fontSize:'.78rem', cursor:'pointer', background:active?C.accent:'transparent', color:active?'#fff':C.muted, fontFamily:'inherit', fontWeight:active?500:400, transition:'all .18s' }),
+    outBtn: hi => ({ padding:'6px 14px', borderRadius:6, border:`1px solid ${hi?C.green:C.border}`, background:C.bg, color:hi?C.green:'#c9d1d9', fontSize:'.76rem', cursor:'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', gap:5, transition:'all .18s' }),
+    card: { background:C.card, border:`1px solid ${C.border}`, borderRadius:12, padding:18 },
+    label: { fontSize:'.72rem', fontWeight:600, textTransform:'uppercase', letterSpacing:'.08em', color:C.muted, marginBottom:10 },
+    textarea: { width:'100%', background:C.bg, border:`1px solid ${C.border}`, borderRadius:8, color:C.text, padding:12, fontSize:'.85rem', lineHeight:1.65, resize:'vertical', minHeight:240, fontFamily:'inherit' }
+  };
+
+  return (
+    <div style={{background:C.bg, minHeight:'100vh', color:C.text, fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif'}}>
+
+      {/* Header */}
+      <div className="header-pad" style={{background:'linear-gradient(135deg,#0d1020,#080b11)', borderBottom:`1px solid ${C.border}`, padding:'18px 32px', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:12}}>
+        <div style={{display:'flex', alignItems:'center', gap:14}}>
+          <div style={{width:38,height:38,background:'linear-gradient(135deg,#6c63ff,#a855f7)',borderRadius:10,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}>✦</div>
+          <div>
+            <div style={{fontSize:'1.35rem',fontWeight:800,letterSpacing:'-.03em',background:'linear-gradient(135deg,#e6edf3,#a5b4fc)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>Hyrd</div>
+            <div style={{fontSize:'.75rem',color:C.muted,marginTop:1}}>Tailor your resume, cover letter and application — naturally, strategically, undetectably.</div>
+          </div>
+        </div>
+        <button onClick={()=>setShowKey(v=>!v)} style={{padding:'7px 16px',borderRadius:8,border:`1px solid ${apiKey?C.green:C.border}`,background:'transparent',color:apiKey?C.green:C.muted,fontSize:'.78rem',cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',gap:7,transition:'all .2s'}}>
+          {apiKey ? '🔑 API Key set' : '🔑 Enter API Key'}
+        </button>
+      </div>
+
+      {/* API Key panel */}
+      {showKey && (
+        <div className="fade-in" style={{background:'#0a0d1a',borderBottom:`1px solid ${C.border}`,padding:'18px 32px'}}>
+          <div style={{maxWidth:600}}>
+            <div style={{fontSize:'.72rem',fontWeight:600,textTransform:'uppercase',letterSpacing:'.08em',color:C.muted,marginBottom:8}}>Anthropic API Key</div>
+            <div style={{display:'flex',gap:10}}>
+              <input type="password" value={apiKey} onChange={e=>setApiKey(e.target.value)} onKeyDown={e=>e.key==='Enter'&&setShowKey(false)} placeholder="sk-ant-api03-..." style={{flex:1,background:C.bg,border:`1px solid ${C.border}`,borderRadius:8,color:C.text,padding:'10px 14px',fontSize:'.85rem',fontFamily:'inherit'}} />
+              <button onClick={()=>setShowKey(false)} style={{padding:'10px 20px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#6c63ff,#a855f7)',color:'#fff',fontSize:'.82rem',fontWeight:600,cursor:'pointer',fontFamily:'inherit',flexShrink:0}}>Save</button>
+            </div>
+            <div style={{fontSize:'.71rem',color:'#484f58',marginTop:8,lineHeight:1.6}}>
+              Your key is used only in this browser session and sent directly to the Anthropic API. It is never stored on any server.
+              Get your key at <a href="https://console.anthropic.com" target="_blank" style={{color:'#a5b4fc'}}>console.anthropic.com</a>.
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="page-pad" style={{maxWidth:1180,margin:'0 auto',padding:'28px 24px'}}>
+
+        {/* Input grid */}
+        <div className="input-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:20}}>
+          <div style={S.card}>
+            <div style={S.label}>📋 Job Description</div>
+            <textarea value={jd} onChange={e=>setJd(e.target.value)} placeholder="Paste the full job posting — title, responsibilities, requirements, everything..." style={S.textarea} />
+          </div>
+          <div style={S.card}>
+            <div style={S.label}>📄 Your Resume</div>
+            <div style={{display:'flex',background:C.bg,borderRadius:7,padding:3,gap:3,marginBottom:10}}>
+              <button style={S.togBtn(mode==='paste')} onClick={()=>setMode('paste')}>✏️ Paste Text</button>
+              <button style={S.togBtn(mode==='file')} onClick={()=>setMode('file')}>📎 Upload File</button>
+            </div>
+            {mode==='paste'
+              ? <textarea value={resText} onChange={e=>setResText(e.target.value)} placeholder="Paste your current resume here..." style={{...S.textarea, minHeight:200}} />
+              : <label
+                  onDragOver={e=>{e.preventDefault();setDrag(true)}}
+                  onDragLeave={()=>setDrag(false)}
+                  onDrop={e=>{e.preventDefault();setDrag(false);handleFile(e.dataTransfer.files[0])}}
+                  style={{border:`2px dashed ${fileName?C.green:drag?C.accent:C.border}`,borderRadius:8,minHeight:200,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:10,cursor:'pointer',background:fileName?'rgba(63,185,80,.05)':drag?'rgba(108,99,255,.06)':'transparent',transition:'all .2s'}}>
+                  <input type="file" accept=".pdf,.docx" style={{display:'none'}} onChange={e=>handleFile(e.target.files[0])} />
+                  <div style={{fontSize:'2rem'}}>{fileName?'✅':'📎'}</div>
+                  <div style={{fontSize:'.82rem',color:C.muted,textAlign:'center',lineHeight:1.5}}>
+                    {fileName
+                      ? <span style={{color:C.green,fontWeight:600}}>{fileName} parsed successfully</span>
+                      : <><strong style={{color:C.text}}>Drop your file here</strong> or click to browse<br/><span style={{fontSize:'.72rem',color:'#484f58'}}>PDF and DOCX supported</span></>}
+                  </div>
+                </label>
+            }
+          </div>
+        </div>
+
+        {/* Questions */}
+        <div style={{...S.card, marginBottom:20}}>
+          <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:14,gap:12}}>
+            <div>
+              <div style={S.label}>❓ Application Questions <span style={{color:'#484f58',fontWeight:400,textTransform:'none',letterSpacing:0}}>(optional)</span></div>
+              <div style={{fontSize:'.75rem',color:'#484f58',marginTop:2}}>Add questions from the job application — "Why us?", behavioural prompts, cover letter questions.</div>
+            </div>
+            <button onClick={addQ} style={{padding:'6px 14px',borderRadius:7,border:`1px dashed ${C.accent}`,background:'rgba(108,99,255,.08)',color:'#a5b4fc',fontSize:'.78rem',cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap',flexShrink:0}}>+ Add Question</button>
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:10}}>
+            {questions.map((q, i) => (
+              <div key={i} style={{display:'flex',gap:8,alignItems:'center'}}>
+                <input value={q} onChange={e=>updateQ(i,e.target.value)} placeholder={`Question ${i+1} — e.g. "Why do you want to work here?"`}
+                  style={{flex:1,background:C.bg,border:`1px solid ${C.border}`,borderRadius:8,color:C.text,padding:'10px 12px',fontSize:'.84rem',fontFamily:'inherit'}} />
+                {questions.length>1 && (
+                  <button onClick={()=>removeQ(i)} style={{width:30,height:30,borderRadius:6,border:`1px solid ${C.border}`,background:'transparent',color:C.muted,cursor:'pointer',fontSize:'1rem',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>×</button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Generate */}
+        <button disabled={loading} onClick={generate} style={{width:'100%',padding:14,background:loading?'#1a1d2e':'linear-gradient(135deg,#6c63ff,#a855f7)',border:'none',borderRadius:10,color:'#fff',fontSize:'1rem',fontWeight:600,cursor:loading?'not-allowed':'pointer',marginBottom:28,letterSpacing:'.02em',fontFamily:'inherit',opacity:loading?.65:1,transition:'all .2s'}}>
+          {loading
+            ? <span style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10}}><span style={{width:16,height:16,border:`2px solid rgba(255,255,255,.3)`,borderTopColor:'#fff',borderRadius:'50%',display:'inline-block',animation:'spin .75s linear infinite'}}></span>{loadMsg}</span>
+            : '✦  Tailor My Resume and Generate Cover Letter'}
+        </button>
+
+        {error && (
+          <div style={{color:C.red,fontSize:'.82rem',padding:'12px 16px',background:'rgba(248,81,73,.08)',border:'1px solid rgba(248,81,73,.2)',borderRadius:8,marginBottom:20,lineHeight:1.5}}>{error}</div>
+        )}
+
+        {/* Output */}
+        {result && (
+          <div id="output-section" className="fade-in">
+
+            {/* ATS card */}
+            <div className="ats-wrap" style={{background:'linear-gradient(135deg,#0d1020,#0d1117)',border:`1px solid ${C.border}`,borderRadius:12,padding:'22px 24px',marginBottom:20,display:'flex',alignItems:'flex-start',gap:28}}>
+              <div style={{position:'relative',width:96,height:96,flexShrink:0}}>
+                <svg width="96" height="96" viewBox="0 0 96 96" style={{transform:'rotate(-90deg)'}}>
+                  <circle cx="48" cy="48" r="40" fill="none" stroke={C.border} strokeWidth="9"/>
+                  <circle cx="48" cy="48" r="40" fill="none" stroke={scoreColor} strokeWidth="9" strokeLinecap="round"
+                    strokeDasharray="251.3" strokeDashoffset={dashOffset}
+                    style={{transition:'stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)'}}/>
+                </svg>
+                <div style={{position:'absolute',inset:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
+                  <div style={{fontSize:'1.55rem',fontWeight:700,color:scoreColor,lineHeight:1}}>{score}</div>
+                  <div style={{fontSize:'.6rem',color:C.muted,textTransform:'uppercase',letterSpacing:'.06em',marginTop:2}}>ATS Score</div>
+                </div>
+              </div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:'.95rem',fontWeight:600,marginBottom:3}}>{result.ats_confidence} Match Confidence</div>
+                <div style={{fontSize:'.78rem',color:C.muted,marginBottom:14,lineHeight:1.55}}>{result.ats_summary}</div>
+                <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                  {Object.entries(result.ats_breakdown||{}).map(([lbl,pct])=>{
+                    const bc=pct>=80?C.green:pct>=60?C.yellow:C.red;
+                    return (
+                      <div key={lbl} style={{display:'flex',alignItems:'center',gap:10,fontSize:'.75rem'}}>
+                        <div className="bar-lbl" style={{width:130,color:'#8b949e',flexShrink:0}}>{lbl}</div>
+                        <div style={{flex:1,height:5,background:C.border,borderRadius:3,overflow:'hidden'}}>
+                          <div style={{height:'100%',borderRadius:3,background:bc,width:atsAnim?pct+'%':'0%',transition:'width 1.1s cubic-bezier(.4,0,.2,1)'}}/>
+                        </div>
+                        <div style={{width:32,textAlign:'right',fontWeight:500,color:C.text}}>{pct}%</div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{display:'flex',flexWrap:'wrap',gap:5,marginTop:13}}>
+                  {(result.keywords_added||[]).map(k=>(
+                    <span key={k} style={{padding:'3px 9px',borderRadius:20,fontSize:'.7rem',fontWeight:500,background:'rgba(108,99,255,.12)',border:'1px solid rgba(108,99,255,.25)',color:'#a5b4fc'}}>+ {k}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Output tabs */}
+            <div style={{display:'flex',gap:3}}>
+              {tabs.map(([key,label])=>(
+                <button key={key} onClick={()=>setTab(key)} style={{padding:'9px 18px',border:`1px solid ${C.border}`,borderBottom:'none',background:tab===key?C.card:C.bg,color:tab===key?C.text:C.muted,borderRadius:'8px 8px 0 0',cursor:'pointer',fontSize:'.82rem',fontWeight:500,fontFamily:'inherit',transition:'all .18s'}}>
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:'0 8px 8px 8px',padding:20}}>
+
+              {['r','c'].map(t=>(
+                <div key={t} style={{display:tab===t?'block':'none'}}>
+                  <div style={{display:'flex',gap:8,justifyContent:'flex-end',marginBottom:13}}>
+                    <button style={S.outBtn(copied[t])} onClick={()=>cp(t)}>{copied[t]?'✓ Copied!':'📋 Copy'}</button>
+                    <button style={S.outBtn(false)} onClick={()=>dlTxt(t,t==='r'?'tailored_resume.txt':'cover_letter.txt')}>⬇️ .txt</button>
+                    <button style={S.outBtn(false)} onClick={()=>dlDocx(t,t==='r'?'Tailored_Resume':'Cover_Letter')}>📝 .docx</button>
+                  </div>
+                  <div style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:8,padding:18,fontSize:'.83rem',lineHeight:1.85,whiteSpace:'pre-wrap',color:C.text,maxHeight:520,overflowY:'auto'}}>
+                    {t==='r'?result.tailored_resume:result.cover_letter}
+                  </div>
+                </div>
+              ))}
+
+              {hasQAs && (
+                <div style={{display:tab==='q'?'block':'none'}}>
+                  <div style={{display:'flex',gap:8,justifyContent:'flex-end',marginBottom:13}}>
+                    <button style={S.outBtn(copied.q)} onClick={()=>cp('q')}>{copied.q?'✓ Copied!':'📋 Copy All'}</button>
+                    <button style={S.outBtn(false)} onClick={()=>dlTxt('q','application_answers.txt')}>⬇️ .txt</button>
+                    <button style={S.outBtn(false)} onClick={()=>dlDocx('q','Application_Answers')}>📝 .docx</button>
+                  </div>
+                  <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                    {(result.application_answers||[]).map((qa,i)=>(
+                      <div key={i} style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:8,padding:18}}>
+                        <div style={{fontSize:'.7rem',fontWeight:600,textTransform:'uppercase',letterSpacing:'.07em',color:C.accent,marginBottom:8}}>Question {i+1}</div>
+                        <div style={{fontSize:'.88rem',fontWeight:600,color:C.text,marginBottom:10,lineHeight:1.5}}>{qa.question}</div>
+                        <div style={{fontSize:'.84rem',color:'#c9d1d9',lineHeight:1.8,borderTop:`1px solid ${C.border}`,paddingTop:10}}>{qa.answer}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div style={{textAlign:'center',marginTop:48,paddingTop:24,borderTop:`1px solid ${C.border}`,fontSize:'.72rem',color:'#30363d'}}>
+          Hyrd — open source under MIT license.
+          Built with the <a href="https://anthropic.com" target="_blank" style={{color:'#484f58'}}>Anthropic API</a>.
+          <a href="https://github.com/YOUR_USERNAME/hyrd" target="_blank" style={{color:'#484f58',marginLeft:12}}>GitHub</a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
 </html>
