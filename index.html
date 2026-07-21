@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hyrd — AI Resume Tailor</title>
-  <meta name="description" content="Tailor your resume, cover letter and job application with AI — naturally, strategically, undetectably.">
-  <meta property="og:title" content="Hyrd — AI Resume Tailor">
+  <title>Hyrd.me - AI Resume Tailor</title>
+  <meta name="description" content="Tailor your resume, cover letter and job application with AI - naturally, strategically, undetectably.">
+  <meta property="og:title" content="Hyrd.me - AI Resume Tailor">
   <meta property="og:description" content="Tailor your resume and cover letter with AI. Sounds human. Scores high on ATS.">
   <style>
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -54,7 +54,7 @@ if (window.pdfjsLib) {
 const sanitize = txt => {
   if (!txt) return txt;
   return txt
-    .replace(/\s*—\s*/g, ', ')
+    .replace(/\s*-\s*/g, ', ')
     .replace(/\s*--\s*/g, ', ')
     .replace(/;\s*([a-zA-Z])/g, (_, c) => '. ' + c.toUpperCase())
     .replace(/([a-z]{3,}[^:\n]{2,})\s*:\s*([a-zA-Z])/g, (m, b, a) => b + '. ' + a.toUpperCase())
@@ -162,7 +162,7 @@ function App() {
 MISSION: Achieve the highest possible ATS match score, targeting 95 to 100 percent. Every section of the resume must be deliberately engineered to mirror the JD language, priorities, and structure while remaining truthful and natural.
 
 BANNED PUNCTUATION AND PATTERNS:
-No em dashes (—) or double hyphens (--). Restructure any sentence that needs one.
+No em dashes (-) or double hyphens (--). Restructure any sentence that needs one.
 No semicolons (;) in sentences. Break the thought into two sentences instead.
 No colons (:) mid-sentence to introduce lists or clauses. Write it out as a full sentence or split it.
 No contractions anywhere. Write "I have" not "I've", "I would" not "I'd", "it is" not "it's", "do not" not "don't", "cannot" not "can't", "will not" not "won't", "I am" not "I'm". Every word written out in full.
@@ -346,8 +346,8 @@ Return ONLY this exact JSON structure with no text before or after it:
         <div style={{display:'flex', alignItems:'center', gap:14}}>
           <div style={{width:38,height:38,background:'linear-gradient(135deg,#6c63ff,#a855f7)',borderRadius:10,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}>✦</div>
           <div>
-            <div style={{fontSize:'1.35rem',fontWeight:800,letterSpacing:'-.03em',background:'linear-gradient(135deg,#e6edf3,#a5b4fc)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>Hyrd</div>
-            <div style={{fontSize:'.75rem',color:C.muted,marginTop:1}}>Tailor your resume, cover letter and application — naturally, strategically, undetectably.</div>
+            <div style={{fontSize:'1.35rem',fontWeight:800,letterSpacing:'-.03em',background:'linear-gradient(135deg,#e6edf3,#a5b4fc)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>Hyrd.me</div>
+            <div style={{fontSize:'.75rem',color:C.muted,marginTop:1}}>Tailor your resume, cover letter and application - naturally, strategically, undetectably.</div>
           </div>
         </div>
         <button onClick={()=>setShowKey(v=>!v)} style={{padding:'7px 16px',borderRadius:8,border:`1px solid ${apiKey?C.green:C.border}`,background:'transparent',color:apiKey?C.green:C.muted,fontSize:'.78rem',cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',gap:7,transition:'all .2s'}}>
@@ -378,7 +378,7 @@ Return ONLY this exact JSON structure with no text before or after it:
         <div className="input-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:20}}>
           <div style={S.card}>
             <div style={S.label}>📋 Job Description</div>
-            <textarea value={jd} onChange={e=>setJd(e.target.value)} placeholder="Paste the full job posting — title, responsibilities, requirements, everything..." style={S.textarea} />
+            <textarea value={jd} onChange={e=>setJd(e.target.value)} placeholder="Paste the full job posting - title, responsibilities, requirements, everything..." style={S.textarea} />
           </div>
           <div style={S.card}>
             <div style={S.label}>📄 Your Resume</div>
@@ -410,14 +410,14 @@ Return ONLY this exact JSON structure with no text before or after it:
           <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:14,gap:12}}>
             <div>
               <div style={S.label}>❓ Application Questions <span style={{color:'#484f58',fontWeight:400,textTransform:'none',letterSpacing:0}}>(optional)</span></div>
-              <div style={{fontSize:'.75rem',color:'#484f58',marginTop:2}}>Add questions from the job application — "Why us?", behavioural prompts, cover letter questions.</div>
+              <div style={{fontSize:'.75rem',color:'#484f58',marginTop:2}}>Add questions from the job application - "Why us?", behavioural prompts, cover letter questions.</div>
             </div>
             <button onClick={addQ} style={{padding:'6px 14px',borderRadius:7,border:`1px dashed ${C.accent}`,background:'rgba(108,99,255,.08)',color:'#a5b4fc',fontSize:'.78rem',cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap',flexShrink:0}}>+ Add Question</button>
           </div>
           <div style={{display:'flex',flexDirection:'column',gap:10}}>
             {questions.map((q, i) => (
               <div key={i} style={{display:'flex',gap:8,alignItems:'center'}}>
-                <input value={q} onChange={e=>updateQ(i,e.target.value)} placeholder={`Question ${i+1} — e.g. "Why do you want to work here?"`}
+                <input value={q} onChange={e=>updateQ(i,e.target.value)} placeholder={`Question ${i+1} - e.g. "Why do you want to work here?"`}
                   style={{flex:1,background:C.bg,border:`1px solid ${C.border}`,borderRadius:8,color:C.text,padding:'10px 12px',fontSize:'.84rem',fontFamily:'inherit'}} />
                 {questions.length>1 && (
                   <button onClick={()=>removeQ(i)} style={{width:30,height:30,borderRadius:6,border:`1px solid ${C.border}`,background:'transparent',color:C.muted,cursor:'pointer',fontSize:'1rem',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>×</button>
@@ -528,7 +528,7 @@ Return ONLY this exact JSON structure with no text before or after it:
 
         {/* Footer */}
         <div style={{textAlign:'center',marginTop:48,paddingTop:24,borderTop:`1px solid ${C.border}`,fontSize:'.72rem',color:'#30363d'}}>
-          Hyrd — open source under MIT license.
+          Hyrd.me - open source under MIT license.
           Built with the <a href="https://anthropic.com" target="_blank" style={{color:'#484f58'}}>Anthropic API</a>.
           <a href="https://github.com/YOUR_USERNAME/hyrd" target="_blank" style={{color:'#484f58',marginLeft:12}}>GitHub</a>
         </div>
