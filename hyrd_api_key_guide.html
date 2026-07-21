@@ -1,0 +1,168 @@
+
+<style>
+  .wrap { max-width: 640px; padding: 0.5rem 0 2rem; font-family: var(--font-sans); }
+  .page-title { font-size: 20px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; }
+  .page-sub { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 2rem; }
+  .step { display: flex; gap: 16px; margin-bottom: 2rem; }
+  .step-num { width: 32px; height: 32px; border-radius: 50%; background: var(--bg-accent); color: var(--text-accent); font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .step-body { flex: 1; }
+  .step-title { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 5px; }
+  .step-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 0; }
+  .step-desc a { color: var(--text-accent); text-decoration: none; }
+  .step-desc a:hover { text-decoration: underline; }
+  .step-visual { margin-top: 12px; background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .url-bar { background: var(--surface-0); border: 0.5px solid var(--border); border-radius: 8px; padding: 7px 12px; font-size: 12px; font-family: var(--font-mono); color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .url-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); flex-shrink: 0; }
+  .field-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .field-label { font-size: 11px; color: var(--text-muted); width: 72px; flex-shrink: 0; }
+  .field-val { font-size: 12px; color: var(--text-primary); font-family: var(--font-mono); background: var(--surface-0); border: 0.5px solid var(--border); border-radius: 6px; padding: 4px 10px; flex: 1; }
+  .mock-btn-primary { font-size: 12px; padding: 6px 16px; background: var(--fill-accent); color: var(--on-accent); border: none; border-radius: 6px; cursor: default; font-family: var(--font-sans); }
+  .mock-btn-outline { font-size: 12px; padding: 6px 14px; background: transparent; color: var(--text-accent); border: 0.5px solid var(--border-accent); border-radius: 6px; cursor: default; font-family: var(--font-sans); }
+  .key-display { font-family: var(--font-mono); font-size: 12px; background: var(--surface-0); border: 0.5px solid var(--border-success); border-radius: 6px; padding: 8px 12px; color: var(--text-success); display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .warning-box { background: var(--bg-warning); border: 0.5px solid var(--border-warning); border-radius: 8px; padding: 10px 14px; display: flex; gap: 10px; margin-top: 10px; }
+  .warn-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .warn-text { font-size: 12px; color: var(--text-warning); line-height: 1.6; }
+  .info-box { background: var(--bg-accent); border: 0.5px solid var(--border-accent); border-radius: 8px; padding: 10px 14px; display: flex; gap: 10px; margin-top: 10px; }
+  .info-text { font-size: 12px; color: var(--text-accent); line-height: 1.6; }
+  .cost-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .cost-card { background: var(--surface-0); border: 0.5px solid var(--border); border-radius: 8px; padding: 10px 12px; text-align: center; }
+  .cost-num { font-size: 16px; font-weight: 500; color: var(--text-primary); }
+  .cost-desc { font-size: 11px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
+  .divider { border: none; border-top: 0.5px solid var(--border); margin: 2rem 0; }
+  .hyrd-header { background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+  .hyrd-logo { display: flex; align-items: center; gap: 10px; }
+  .hyrd-mark { width: 28px; height: 28px; background: linear-gradient(135deg,#6c63ff,#a855f7); border-radius: 7px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; flex-shrink: 0; }
+  .hyrd-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .key-btn { font-size: 11px; padding: 5px 12px; background: transparent; border: 0.5px solid var(--border-success); border-radius: 6px; color: var(--text-success); cursor: default; display: flex; align-items: center; gap: 5px; }
+  .key-panel { background: var(--surface-0); border: 0.5px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-top: 8px; }
+  .key-input-row { display: flex; gap: 8px; margin-top: 6px; }
+  .key-input-mock { flex: 1; background: var(--surface-1); border: 0.5px solid var(--border-accent); border-radius: 6px; padding: 6px 10px; font-size: 11px; font-family: var(--font-mono); color: var(--text-muted); }
+  .sidebar-row { display: flex; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 0.5px solid var(--border); font-size: 12px; color: var(--text-secondary); }
+  .sidebar-row:last-child { border-bottom: none; }
+  .sidebar-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+</style>
+
+<div class="wrap">
+
+  <h2 class="page-title">How to get your Anthropic API key</h2>
+  <p class="page-sub">Hyrd uses the Anthropic API to generate your resume and cover letter. You need your own key to run it. This takes about two minutes and costs nothing to set up.</p>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <div class="step-title">Create an Anthropic account</div>
+      <div class="step-desc">Go to <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> and sign up with your email address. If you already use Claude.ai, you can sign in with the same account.</div>
+      <div class="step-visual">
+        <div class="url-bar"><div class="url-dot"></div> console.anthropic.com</div>
+        <div style="text-align:center;padding:8px 0 4px">
+          <div style="font-size:14px;font-weight:500;color:var(--text-primary);margin-bottom:12px">Create your account</div>
+          <div class="field-row"><div class="field-label">Email</div><div class="field-val">your@email.com</div></div>
+          <div class="field-row"><div class="field-label">Password</div><div class="field-val" style="letter-spacing:3px;color:var(--text-muted)">••••••••</div></div>
+          <div style="margin-top:10px"><button class="mock-btn-primary">Create account</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <div class="step-title">Add billing information</div>
+      <div class="step-desc">Go to Settings, then Billing, and add a credit or debit card. Anthropic charges per API call, not a monthly subscription. For personal use with Hyrd, you will spend well under a dollar for dozens of runs. Set a monthly spend limit if you want a hard ceiling.</div>
+      <div class="step-visual">
+        <div style="display:flex;gap:12px">
+          <div style="width:110px;flex-shrink:0">
+            <div class="sidebar-row"><div class="sidebar-dot" style="background:var(--text-accent)"></div>Dashboard</div>
+            <div class="sidebar-row"><div class="sidebar-dot" style="background:var(--text-accent)"></div>API Keys</div>
+            <div class="sidebar-row"><div class="sidebar-dot" style="background:var(--fill-accent)"></div><strong style="color:var(--text-primary)">Billing</strong></div>
+            <div class="sidebar-row"><div class="sidebar-dot" style="background:var(--text-accent)"></div>Usage</div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:8px">Billing</div>
+            <div class="field-row"><div class="field-label" style="width:90px">Card number</div><div class="field-val">•••• •••• •••• 4242</div></div>
+            <div class="field-row"><div class="field-label" style="width:90px">Spend limit</div><div class="field-val">$10.00 / month</div></div>
+            <div style="margin-top:8px"><button class="mock-btn-outline">Save billing</button></div>
+          </div>
+        </div>
+        <div class="info-box">
+          <div class="info-text">Setting a spend limit of $5 to $10 per month is more than enough for regular personal use and prevents any surprise charges.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <div class="step-title">Generate your API key</div>
+      <div class="step-desc">Click API Keys in the left sidebar, then Create Key. Give it a recognisable name like "hyrd" so you know what it is later. Copy the key the moment it appears. Anthropic only shows it once.</div>
+      <div class="step-visual">
+        <div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:10px">API Keys</div>
+        <div class="field-row" style="margin-bottom:12px">
+          <div class="field-label" style="width:60px">Name</div>
+          <div class="field-val">hyrd</div>
+          <button class="mock-btn-primary" style="flex-shrink:0">Create Key</button>
+        </div>
+        <div class="key-display">
+          <span>sk-ant-api03-Kx7mN2pQ...</span>
+          <i class="ti ti-copy" style="font-size:15px;color:var(--text-muted)" aria-hidden="true"></i>
+        </div>
+        <div class="warning-box">
+          <i class="ti ti-alert-triangle warn-icon" aria-hidden="true"></i>
+          <div class="warn-text">Copy the key now. This is the only time Anthropic will show it to you. If you lose it, you will need to create a new one.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <div class="step-title">Paste it into Hyrd</div>
+      <div class="step-desc">Click the API Key button in the top right corner of Hyrd, paste your key into the field, and hit Save. Your key stays in the browser for that session only. When you close the tab, it is gone. You will need to paste it again next time you open the app.</div>
+      <div class="step-visual">
+        <div class="hyrd-header">
+          <div class="hyrd-logo">
+            <div class="hyrd-mark">✦</div>
+            <div class="hyrd-name">Hyrd</div>
+          </div>
+          <div class="key-btn"><i class="ti ti-check" style="font-size:13px" aria-hidden="true"></i> API Key set</div>
+        </div>
+        <div class="key-panel">
+          <div style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:4px">Anthropic API Key</div>
+          <div class="key-input-row">
+            <div class="key-input-mock">sk-ant-api03-Kx7mN2pQ••••••••••••••••••••</div>
+            <button class="mock-btn-primary" style="flex-shrink:0;font-size:11px">Save</button>
+          </div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:6px;line-height:1.6">Your key is used only for this session and sent directly to the Anthropic API. It is never stored on any server.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div style="font-size:14px;font-weight:500;color:var(--text-primary);margin-bottom:12px">What it will cost you</div>
+  <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:12px">Each time you generate a resume and cover letter, Hyrd sends your job description and resume to the Anthropic API and gets back the tailored content. You are billed for the text processed, not per session.</p>
+
+  <div class="cost-grid">
+    <div class="cost-card">
+      <div class="cost-num">$0.05</div>
+      <div class="cost-desc">Typical cost per generation</div>
+    </div>
+    <div class="cost-card">
+      <div class="cost-num">~20</div>
+      <div class="cost-desc">Runs for roughly $1</div>
+    </div>
+    <div class="cost-card">
+      <div class="cost-num">$5</div>
+      <div class="cost-desc">Recommended monthly limit to set</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div style="font-size:14px;font-weight:500;color:var(--text-primary);margin-bottom:8px">Keeping your key safe</div>
+  <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin:0">Treat your API key like a password. Do not paste it into websites you do not control, do not share it in messages or screenshots, and do not commit it to a public GitHub repository. In Hyrd it travels only from your browser directly to Anthropic. No other server sees it.</p>
+
+</div>
