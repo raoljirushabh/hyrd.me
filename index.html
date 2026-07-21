@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hyrd.me - AI Resume Tailor</title>
+  <title>hyrd.me - AI Resume Tailor</title>
   <meta name="description" content="Tailor your resume, cover letter and job application with AI - naturally, strategically, undetectably.">
-  <meta property="og:title" content="Hyrd.me - AI Resume Tailor">
+  <meta property="og:title" content="hyrd.me - AI Resume Tailor">
   <meta property="og:description" content="Tailor your resume and cover letter with AI. Sounds human. Scores high on ATS.">
   <style>
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -199,7 +199,7 @@ Result: concrete outcome, quantified if the resume provides any basis, otherwise
 The bullet reads as one fluid sentence or two short ones. Never three clauses joined by any punctuation.
 
 FINAL SELF-CHECK BEFORE OUTPUT:
-Scan every sentence and verify: zero em dashes, zero '—', zero double hyphens, zero semicolons, zero mid-sentence colons, zero contractions, every bullet in the same role starts with a different verb, no two consecutive sentences follow identical structure. If any of the above are present, rewrite the offending sentence before returning.
+Scan every sentence and verify: zero em dashes, zero double hyphens, zero semicolons, zero mid-sentence colons, zero contractions, every bullet in the same role starts with a different verb, no two consecutive sentences follow identical structure. If any of the above are present, rewrite the offending sentence before returning.
 
 JOB DESCRIPTION:
 ${jd}
@@ -346,7 +346,7 @@ Return ONLY this exact JSON structure with no text before or after it:
         <div style={{display:'flex', alignItems:'center', gap:14}}>
           <div style={{width:38,height:38,background:'linear-gradient(135deg,#6c63ff,#a855f7)',borderRadius:10,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}>✦</div>
           <div>
-            <div style={{fontSize:'1.35rem',fontWeight:800,letterSpacing:'-.03em',background:'linear-gradient(135deg,#e6edf3,#a5b4fc)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>Hyrd.me</div>
+            <div style={{fontSize:'1.35rem',fontWeight:800,letterSpacing:'-.03em',background:'linear-gradient(135deg,#e6edf3,#a5b4fc)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>hyrd.me</div>
             <div style={{fontSize:'.75rem',color:C.muted,marginTop:1}}>Tailor your resume, cover letter and application - naturally, strategically, undetectably.</div>
           </div>
         </div>
@@ -435,7 +435,25 @@ Return ONLY this exact JSON structure with no text before or after it:
         </button>
 
         {error && (
-          <div style={{color:C.red,fontSize:'.82rem',padding:'12px 16px',background:'rgba(248,81,73,.08)',border:'1px solid rgba(248,81,73,.2)',borderRadius:8,marginBottom:20,lineHeight:1.5}}>{error}</div>
+          <div style={{
+            fontSize: '.82rem',
+            padding: '12px 16px',
+            borderRadius: 8,
+            marginBottom: 20,
+            lineHeight: 1.6,
+            ...(error.includes('API key') ? {
+              color: '#92cbff',
+              background: 'rgba(14,30,58,.85)',
+              border: '1px solid rgba(56,100,180,.45)'
+            } : {
+              color: C.red,
+              background: 'rgba(248,81,73,.08)',
+              border: '1px solid rgba(248,81,73,.2)'
+            })
+          }}>
+            {error.includes('API key') && <span style={{marginRight:7}}>🔑</span>}
+            {error}
+          </div>
         )}
 
         {/* Output */}
@@ -528,9 +546,9 @@ Return ONLY this exact JSON structure with no text before or after it:
 
         {/* Footer */}
         <div style={{textAlign:'center',marginTop:48,paddingTop:24,borderTop:`1px solid ${C.border}`,fontSize:'.72rem',color:'#30363d'}}>
-          Hyrd.me - open source under MIT license.
+          hyrd.me - open source under MIT license.
           Built with the <a href="https://anthropic.com" target="_blank" style={{color:'#484f58'}}>Anthropic API</a>.
-          <a href="https://github.com/YOUR_USERNAME/hyrd" target="_blank" style={{color:'#484f58',marginLeft:12}}>GitHub</a>
+          <a href="https://github.com/YOUR_USERNAME/hyrd.me" target="_blank" style={{color:'#484f58',marginLeft:12}}>GitHub</a>
         </div>
       </div>
     </div>
